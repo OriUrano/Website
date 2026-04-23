@@ -1,0 +1,69 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: build and ship to s3
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: guard — required variables
+        run: |
+          : "${S3_BUCKET:?repo variable S3_BUCKET must be set (Settings → Secrets and variables → Actions → Variables)}"
+          : "${CLOUDFRONT_DISTRIBUTION_ID:?repo variable CLOUDFRONT_DISTRIBUTION_ID must be set}"
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: install
+        run: npm ci
+
+      - name: build
+        run: npm run build
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: sync immutable assets (1-year cache)
+        run: |
+          aws s3 sync build/_app/ "s3://${S3_BUCKET}/_app/" \
+            --delete \
+            --cache-control 'public, max-age=31536000, immutable'
+
+      - name: sync everything else (no-cache html)
+        run: |
+          aws s3 sync build/ "s3://${S3_BUCKET}/" \
+            --delete \
+            --exclude '_app/*' \
+            --cache-control 'public, max-age=0, must-revalidate'
+
+      - name: invalidate cloudfront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --paths '/*'
