@@ -49,18 +49,46 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: sync immutable assets (1-year cache)
+      # The bucket is shared with personal file-sharing content at the root.
+      # We --delete only within site-owned prefixes and never at the bucket root,
+      # so hotlinked media files (mp4, gif, zip, etc.) are never touched.
+
+      - name: sync immutable assets (_app/*) with long cache
         run: |
           aws s3 sync build/_app/ "s3://${S3_BUCKET}/_app/" \
             --delete \
             --cache-control 'public, max-age=31536000, immutable'
 
-      - name: sync everything else (no-cache html)
+      - name: sync site-owned directories (with delete — these prefixes are entirely ours)
         run: |
-          aws s3 sync build/ "s3://${S3_BUCKET}/" \
-            --delete \
-            --exclude '_app/*' \
-            --cache-control 'public, max-age=0, must-revalidate'
+          for dir in about projects blog contact; do
+            if [ -d "build/$dir" ]; then
+              echo "→ syncing $dir/"
+              aws s3 sync "build/$dir/" "s3://${S3_BUCKET}/$dir/" \
+                --delete \
+                --cache-control 'public, max-age=0, must-revalidate'
+            fi
+          done
+
+      - name: overwrite root-level site files (NO delete — preserves media)
+        run: |
+          aws s3 cp build/index.html "s3://${S3_BUCKET}/index.html" \
+            --cache-control 'public, max-age=0, must-revalidate' \
+            --content-type 'text/html; charset=utf-8'
+          if [ -f build/404.html ]; then
+            aws s3 cp build/404.html "s3://${S3_BUCKET}/404.html" \
+              --cache-control 'public, max-age=0, must-revalidate' \
+              --content-type 'text/html; charset=utf-8'
+          fi
+          if [ -f build/favicon.svg ]; then
+            aws s3 cp build/favicon.svg "s3://${S3_BUCKET}/favicon.svg" \
+              --cache-control 'public, max-age=86400' \
+              --content-type 'image/svg+xml'
+          fi
+          if [ -f build/avatar.png ]; then
+            aws s3 cp build/avatar.png "s3://${S3_BUCKET}/avatar.png" \
+              --cache-control 'public, max-age=86400'
+          fi
 
       - name: invalidate cloudfront
         run: |
