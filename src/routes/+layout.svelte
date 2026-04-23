@@ -2,6 +2,7 @@
   import '../app.css';
   import Nav from '$lib/components/Nav.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import Starfield from '$lib/components/Starfield.svelte';
 
   let { children } = $props();
 </script>
@@ -18,6 +19,8 @@
     </filter>
   </defs>
 </svg>
+
+<Starfield fixed density={110} />
 
 <Nav />
 <main class="main-wrap">

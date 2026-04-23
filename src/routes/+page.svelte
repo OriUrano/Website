@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Starfield from '$lib/components/Starfield.svelte';
   import Avatar from '$lib/components/Avatar.svelte';
   import ProjectCard from '$lib/components/ProjectCard.svelte';
   import { projects } from '$lib/data/projects';
@@ -12,8 +11,6 @@
 </svelte:head>
 
 <section class="hero">
-  <div class="starwrap"><Starfield /></div>
-
   <div class="hero-grid">
     <aside class="meta">
       <div class="chapter-mark">
@@ -29,9 +26,8 @@
     </aside>
 
     <h1 class="name">
-      <span class="line l1 rise" style="animation-delay: 80ms">ori</span>
-      <span class="ampersand rise" style="animation-delay: 180ms" aria-hidden="true">·</span>
-      <span class="line l2 rise" style="animation-delay: 240ms">urano</span>
+      <span class="line l1 rise" style="animation-delay: 80ms">Ori</span>
+      <span class="line l2 rise" style="animation-delay: 220ms">Urano</span>
     </h1>
 
     <div class="avatar-wrap rise" style="animation-delay: 380ms">
@@ -101,7 +97,7 @@
     <span class="num">IV.</span>
     <span>writ</span>
   </div>
-  <p class="hand">the spellbook is still mostly blank</p>
+  <p class="hand"><span>the spellbook is still mostly blank</span></p>
   <a href="/blog/" class="ink-link arrow-link">peek the table of contents →</a>
 </section>
 
@@ -133,29 +129,25 @@
 
   .hero {
     min-height: 92vh;
-    padding-top: clamp(2rem, 6vh, 4rem);
+    padding-top: clamp(7rem, 16vh, 12rem);
     padding-bottom: clamp(3rem, 8vh, 6rem);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-  }
-  .starwrap {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+    justify-content: flex-start;
   }
   .hero-grid {
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 360px);
-    grid-template-rows: auto auto auto auto;
+    grid-template-columns: minmax(0, 220px) max-content minmax(0, 340px);
+    justify-content: space-between;
+    grid-template-rows: auto auto auto;
     grid-template-areas:
       'meta   name    avatar'
       'meta   tag     avatar'
       'meta   cta     avatar';
-    gap: 1.25rem clamp(1.5rem, 4vw, 3.5rem);
+    gap: 1.25rem clamp(0.5rem, 1.5vw, 1rem);
     align-items: end;
     max-width: 1200px;
     margin: 0 auto;
@@ -164,7 +156,7 @@
   .meta {
     grid-area: meta;
     align-self: start;
-    padding-top: 0.75rem;
+    padding-top: 7rem;
   }
   .chapter-mark {
     display: flex;
@@ -209,18 +201,17 @@
     grid-area: name;
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: clamp(5rem, 15vw, 13rem);
-    line-height: 0.85;
-    letter-spacing: -0.045em;
+    font-size: clamp(4.5rem, 11vw, 9.5rem);
+    line-height: 0.86;
+    letter-spacing: -0.04em;
     margin: 0;
     color: var(--color-bone);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.1em 0.35em;
+    display: block;
+    transform: translateX(-0.75rem);
   }
   .line {
-    display: inline-block;
+    display: block;
+    white-space: nowrap;
   }
   .name .l1 {
     font-style: italic;
@@ -229,6 +220,9 @@
   .name .l2 {
     font-style: normal;
     font-weight: 300;
+    margin-top: 0;
+    padding-left: 0.7em;
+    padding-right: 0.08em;
     color: var(--color-bone);
     background: linear-gradient(
       180deg,
@@ -240,16 +234,12 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .ampersand {
-    display: inline-block;
-    color: var(--color-amber);
-    font-family: var(--font-mono);
-    font-size: 0.35em;
-    transform: translateY(-0.3em);
-  }
 
   .avatar-wrap {
     grid-area: avatar;
+    align-self: start;
+    margin-top: 2rem;
+    transform: translateX(-2.5rem);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -439,9 +429,14 @@
     font-family: var(--font-hand);
     font-size: clamp(1.8rem, 4vw, 2.5rem);
     color: var(--color-amber);
-    line-height: 1;
-    margin: 0 0 1rem;
+    line-height: 1.1;
+    margin: 0 0 1.25rem;
+  }
+  .hand > span {
+    display: inline-block;
     transform: rotate(-1.5deg);
+  }
+  .writ-teaser .arrow-link {
     display: inline-block;
   }
 

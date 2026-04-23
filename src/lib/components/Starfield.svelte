@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
+  let { fixed = false, density = 90 }: { fixed?: boolean; density?: number } = $props();
+
   type Star = {
     key: number;
     size: number;
@@ -24,7 +26,7 @@
       'var(--color-indigo-glow)'
     ];
     const arr: Star[] = [];
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < density; i++) {
       arr.push({
         key: i,
         size: Math.random() * 2 + 0.6,
@@ -39,7 +41,7 @@
   });
 </script>
 
-<div class="starfield" aria-hidden="true">
+<div class="starfield" class:fixed aria-hidden="true">
   {#each stars as s (s.key)}
     <span
       class="star"
@@ -64,6 +66,9 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
+  }
+  .starfield.fixed {
+    position: fixed;
   }
   .star {
     position: absolute;

@@ -1,6 +1,6 @@
 ---
 title: another small thing
-summary: Another placeholder. Good projects to put here: anything you've actually finished, anything that taught you something you didn't know before.
+summary: "Another placeholder. Good projects to put here: anything you've actually finished, anything that taught you something you didn't know before."
 year: 2025
 tags: [placeholder]
 ---
